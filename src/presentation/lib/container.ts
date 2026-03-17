@@ -3,6 +3,7 @@ import { CreateProjectUseCase } from "../../application/use-cases/project/Create
 import { SaveProjectUseCase } from "../../application/use-cases/project/SaveProjectUseCase";
 import { LoadProjectUseCase } from "../../application/use-cases/project/LoadProjectUseCase";
 import { DeleteProjectUseCase } from "../../application/use-cases/project/DeleteProjectUseCase";
+import { ExportProjectUseCase } from "../../application/use-cases/export/ExportProjectUseCase";
 
 const projectRepository = new LocalStorageProjectRepository();
 
@@ -12,4 +13,5 @@ export const container = {
   saveProjectUseCase: new SaveProjectUseCase(projectRepository),
   loadProjectUseCase: new LoadProjectUseCase(projectRepository),
   deleteProjectUseCase: new DeleteProjectUseCase(projectRepository),
+  exportProjectUseCase: new ExportProjectUseCase(),
 };

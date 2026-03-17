@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useRef, useEffect } from "react";
+import { useState, useRef } from "react";
 import { useSchemaStore } from "../../store/schemaStore";
 import { Button } from "@/components/ui/button";
 import { Save, Undo, Redo, Download, Home, Edit2, Check, X } from "lucide-react";
@@ -10,19 +10,13 @@ import { useRouter } from "next/navigation";
 import { Input } from "@/components/ui/input";
 
 export default function Toolbar() {
-  const { activeProject, saveCurrentProject, renameProject } = useSchemaStore();
+  const { activeProject, saveCurrentProject, renameProject, exportProject } = useSchemaStore();
   const { undo, redo, canUndo, canRedo } = useUndoRedo();
   const router = useRouter();
 
   const [isEditing, setIsEditing] = useState(false);
-  const [editedName, setEditedName] = useState("");
+  const [editedName, setEditedName] = useState(activeProject?.name || "");
   const inputRef = useRef<HTMLInputElement>(null);
-
-  useEffect(() => {
-    if (activeProject) {
-      setEditedName(activeProject.name);
-    }
-  }, [activeProject]);
 
   if (!activeProject) return null;
 
@@ -31,8 +25,9 @@ export default function Toolbar() {
     toast.success("Project saved!", { autoClose: 2000 });
   };
 
-  const handleExport = () => {
-    toast.info("Export coming soon!", { autoClose: 2500 });
+  const handleExport = async () => {
+    await exportProject();
+    toast.success("Export successful!", { autoClose: 2500 });
   };
 
   const startEditing = () => {

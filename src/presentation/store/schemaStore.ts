@@ -19,6 +19,7 @@ interface SchemaState {
   updateActiveProject: (updater: (draft: Project) => void) => void;
   deleteProject: (id: string) => Promise<void>;
   renameProject: (id: string, newName: string) => Promise<void>;
+  exportProject: (projectId?: string) => Promise<void>;
   setSelectedElement: (element: { type: 'table' | 'column'; tableId: string; columnId?: string } | null) => void;
 }
 
@@ -108,6 +109,34 @@ export const useSchemaStore = create<SchemaState>((set, get) => ({
       projectsList: state.projectsList.map(p => p.id === id ? project : p),
       activeProject: state.activeProject?.id === id ? project : state.activeProject,
     }));
+  },
+
+  exportProject: async (projectId?: string) => {
+    let projectToExport: Project | null = null;
+    
+    if (projectId) {
+      projectToExport = get().projectsList.find(p => p.id === projectId) || null;
+    } else {
+      projectToExport = get().activeProject;
+    }
+
+    if (!projectToExport) return;
+
+    try {
+      const { content, filename } = container.exportProjectUseCase.execute(projectToExport);
+      
+      const blob = new Blob([content], { type: "text/plain" });
+      const url = URL.createObjectURL(blob);
+      const link = document.createElement("a");
+      link.href = url;
+      link.download = filename;
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+      URL.revokeObjectURL(url);
+    } catch (error) {
+      console.error("Export failed:", error);
+    }
   },
 
   // Helper for triggering reactivity by returning a fresh clone constructed via Mapper

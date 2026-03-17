@@ -27,6 +27,7 @@ export default function Home() {
     createProject,
     deleteProject,
     renameProject,
+    exportProject,
     isLoading,
   } = useSchemaStore();
 
@@ -67,10 +68,10 @@ export default function Home() {
     toast.error(`"${name}" deleted`, { autoClose: 2500 });
   };
 
-  const handleExport = (e: React.MouseEvent, projectId: string) => {
+  const handleExport = async (e: React.MouseEvent, projectId: string) => {
     e.stopPropagation();
-    toast.info("Export coming soon!", { autoClose: 2000 });
-    console.log("Export project", projectId);
+    await exportProject(projectId);
+    toast.success("Export successful!", { autoClose: 2000 });
   };
 
   const handleRename = async (newName: string) => {
