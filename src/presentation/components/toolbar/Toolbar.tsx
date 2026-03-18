@@ -5,7 +5,8 @@ import { useSchemaStore } from "../../store/schemaStore";
 import { Button } from "@/components/ui/button";
 import { 
   Save, Undo, Redo, Download, Home, Edit2, Check, X, Layout, 
-  Image as ImageIcon, ChevronDown, FileCode, FileJson, FileText, FileType
+  Image as ImageIcon, ChevronDown, FileCode, FileJson, FileText, FileType,
+  Maximize2
 } from "lucide-react";
 import { 
   DropdownMenu, 
@@ -22,7 +23,7 @@ import { useRouter } from "next/navigation";
 import { Input } from "@/components/ui/input";
 
 export default function Toolbar() {
-  const { getNodes } = useReactFlow();
+  const { getNodes, fitView } = useReactFlow();
   const { 
     activeProject, 
     saveCurrentProject, 
@@ -175,6 +176,9 @@ export default function Toolbar() {
         </Button>
         <Button variant="outline" size="icon" onClick={redo} disabled={!canRedo}>
           <Redo className="w-4 h-4" />
+        </Button>
+        <Button variant="outline" size="icon" onClick={() => fitView()} title="Zoom to Fit (Ctrl+0)">
+          <Maximize2 className="w-4 h-4" />
         </Button>
         <div className="w-px h-6 bg-slate-200 mx-1" />
         <Button 

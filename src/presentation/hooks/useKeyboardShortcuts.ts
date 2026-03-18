@@ -2,8 +2,10 @@
 
 import { useEffect } from "react";
 import { useSchemaStore } from "../store/schemaStore";
+import { useReactFlow } from "@xyflow/react";
 
 export const useKeyboardShortcuts = () => {
+  const { fitView } = useReactFlow();
   const {
     undo,
     redo,
@@ -63,6 +65,12 @@ export const useKeyboardShortcuts = () => {
         autoLayout();
       }
 
+      // Zoom to Fit: Ctrl+0
+      if (cmdOrCtrl && e.key === "0") {
+        e.preventDefault();
+        fitView();
+      }
+
       // Delete: Delete or Backspace
       if (e.key === "Delete" || e.key === "Backspace") {
         if (selectedElement) {
@@ -83,5 +91,5 @@ export const useKeyboardShortcuts = () => {
 
     window.addEventListener("keydown", handleKeyDown);
     return () => window.removeEventListener("keydown", handleKeyDown);
-  }, [undo, redo, saveCurrentProject, exportProject, selectedElement, activeProject, deleteSelectedElement, autoLayout]);
+  }, [undo, redo, saveCurrentProject, exportProject, selectedElement, activeProject, deleteSelectedElement, autoLayout, fitView]);
 };

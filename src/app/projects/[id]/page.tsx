@@ -10,12 +10,14 @@ import PropertiesPanel from "@/presentation/components/panels/PropertiesPanel";
 import { ReactFlowProvider } from "@xyflow/react";
 import { useKeyboardShortcuts } from "@/presentation/hooks/useKeyboardShortcuts";
 
+function ShortcutsWrapper() {
+  useKeyboardShortcuts();
+  return null;
+}
+
 export default function ProjectEditor({ params }: { params: Promise<{ id: string }> }) {
   const { id } = use(params);
   const { loadProject, activeProject, isLoading, saveCurrentProject } = useSchemaStore();
-
-  // Initialize keyboard shortcuts
-  useKeyboardShortcuts();
 
   // Initial load
   useEffect(() => {
@@ -37,6 +39,7 @@ export default function ProjectEditor({ params }: { params: Promise<{ id: string
 
   return (
     <ReactFlowProvider>
+      <ShortcutsWrapper />
       <div className="flex flex-col h-screen w-full bg-slate-50 overflow-hidden font-sans">
         <Toolbar />
         <div className="flex flex-1 overflow-hidden relative">
