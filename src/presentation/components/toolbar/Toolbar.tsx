@@ -3,12 +3,26 @@
 import { useState, useRef } from "react";
 import { useSchemaStore } from "../../store/schemaStore";
 import { Button } from "@/components/ui/button";
-import { Save, Undo, Redo, Download, Home, Edit2, Check, X, Layout } from "lucide-react";
+import { 
+  Save, Undo, Redo, Download, Home, Edit2, Check, X, Layout, 
+  Image as ImageIcon, ChevronDown, FileCode, FileJson, FileText, FileType
+} from "lucide-react";
+import { 
+  DropdownMenu, 
+  DropdownMenuContent, 
+  DropdownMenuItem, 
+  DropdownMenuTrigger,
+  DropdownMenuSeparator,
+  DropdownMenuLabel
+} from "../ui/dropdown-menu";
+import { useReactFlow, getNodesBounds, getViewportForBounds } from "@xyflow/react";
+import { toPng, toSvg } from "html-to-image";
 import { toast } from "react-toastify";
 import { useRouter } from "next/navigation";
 import { Input } from "@/components/ui/input";
 
 export default function Toolbar() {
+  const { getNodes } = useReactFlow();
   const { 
     activeProject, 
     saveCurrentProject, 
@@ -39,6 +53,61 @@ export default function Toolbar() {
   const handleExport = async () => {
     await exportProject();
     toast.success("Export successful!", { autoClose: 2500 });
+  };
+
+  const downloadFile = (dataUrl: string, extension: string) => {
+    const a = document.createElement('a');
+    a.setAttribute('download', `${activeProject?.name || 'schema'}.${extension}`);
+    a.setAttribute('href', dataUrl);
+    a.click();
+  };
+
+  const handleExportImage = async (format: 'png' | 'svg') => {
+    const nodes = getNodes();
+    if (nodes.length === 0) {
+      toast.error("No tables to export");
+      return;
+    }
+
+    const viewport = document.querySelector('.react-flow__viewport') as HTMLElement;
+    if (!viewport) return;
+
+    try {
+      const nodesBounds = getNodesBounds(nodes);
+      // Add padding
+      const padding = 50;
+      const width = nodesBounds.width + padding * 2;
+      const height = nodesBounds.height + padding * 2;
+      
+      const transform = getViewportForBounds(nodesBounds, width, height, 0.5, 2, 0.1);
+
+      const options = {
+        backgroundColor: '#f8fafc',
+        width: width,
+        height: height,
+        style: {
+          width: `${width}px`,
+          height: `${height}px`,
+          transform: `translate(${transform.x}px, ${transform.y}px) scale(${transform.zoom})`,
+          fontFamily: 'sans-serif', // Explicitly set font family
+        },
+        fontEmbedCSS: '', // Bypass automatic font embedding which is causing the crash
+        skipFonts: true, // Newer versions of html-to-image support this
+      };
+
+      if (format === 'png') {
+        const dataUrl = await toPng(viewport, options);
+        downloadFile(dataUrl, 'png');
+      } else {
+        const dataUrl = await toSvg(viewport, options);
+        downloadFile(dataUrl, 'svg');
+      }
+      
+      toast.success(`Exported as ${format.toUpperCase()}`);
+    } catch (error) {
+      console.error("Export error:", error);
+      toast.error("Failed to export image");
+    }
   };
 
   const startEditing = () => {
@@ -120,11 +189,42 @@ export default function Toolbar() {
           <Layout className="w-4 h-4" />
           {isAutoLayoutActive ? "Auto Layout: ON" : "Auto Layout: OFF"}
         </Button>
-        <Button variant="outline" onClick={handleExport} className="gap-2">
-          <Download className="w-4 h-4" />
-          Export
-        </Button>
-        <Button onClick={handleSave} className="gap-2 bg-blue-600 hover:bg-blue-700 text-white">
+        <div className="w-px h-6 bg-slate-200 mx-1" />
+        
+        <DropdownMenu>
+          <DropdownMenuTrigger asChild>
+            <Button variant="outline" className="gap-2">
+              <Download className="w-4 h-4" />
+              Export
+              <ChevronDown className="w-3 h-3 opacity-50" />
+            </Button>
+          </DropdownMenuTrigger>
+          <DropdownMenuContent align="end" className="w-48">
+            <DropdownMenuLabel>Data Export</DropdownMenuLabel>
+            <DropdownMenuItem onClick={handleExport} className="gap-2">
+              <FileCode className="w-4 h-4 text-blue-500" />
+              SQL Schema
+            </DropdownMenuItem>
+            <DropdownMenuItem onClick={handleExport} className="gap-2">
+              <FileJson className="w-4 h-4 text-orange-500" />
+              JSON Model
+            </DropdownMenuItem>
+            
+            <DropdownMenuSeparator />
+            
+            <DropdownMenuLabel>Image Export</DropdownMenuLabel>
+            <DropdownMenuItem onClick={() => handleExportImage('png')} className="gap-2">
+              <ImageIcon className="w-4 h-4 text-emerald-500" />
+              PNG Image
+            </DropdownMenuItem>
+            <DropdownMenuItem onClick={() => handleExportImage('svg')} className="gap-2">
+              <FileType className="w-4 h-4 text-purple-500" />
+              SVG Image
+            </DropdownMenuItem>
+          </DropdownMenuContent>
+        </DropdownMenu>
+
+        <Button onClick={handleSave} className="gap-2 bg-blue-600 hover:bg-blue-700 text-white shadow-sm">
           <Save className="w-4 h-4" />
           Save
         </Button>

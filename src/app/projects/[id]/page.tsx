@@ -7,6 +7,7 @@ import Toolbar from "@/presentation/components/toolbar/Toolbar";
 import Sidebar from "@/presentation/components/panels/Sidebar";
 import PropertiesPanel from "@/presentation/components/panels/PropertiesPanel";
 
+import { ReactFlowProvider } from "@xyflow/react";
 import { useKeyboardShortcuts } from "@/presentation/hooks/useKeyboardShortcuts";
 
 export default function ProjectEditor({ params }: { params: Promise<{ id: string }> }) {
@@ -35,15 +36,17 @@ export default function ProjectEditor({ params }: { params: Promise<{ id: string
   }
 
   return (
-    <div className="flex flex-col h-screen w-full bg-slate-50 overflow-hidden font-sans">
-      <Toolbar />
-      <div className="flex flex-1 overflow-hidden relative">
-        <Sidebar />
-        <main className="flex-1 relative h-full w-full">
-          {activeProject && <SchemaCanvas />}
-        </main>
-        <PropertiesPanel />
+    <ReactFlowProvider>
+      <div className="flex flex-col h-screen w-full bg-slate-50 overflow-hidden font-sans">
+        <Toolbar />
+        <div className="flex flex-1 overflow-hidden relative">
+          <Sidebar />
+          <main className="flex-1 relative h-full w-full">
+            {activeProject && <SchemaCanvas />}
+          </main>
+          <PropertiesPanel />
+        </div>
       </div>
-    </div>
+    </ReactFlowProvider>
   );
 }
