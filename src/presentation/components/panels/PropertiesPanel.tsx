@@ -12,6 +12,9 @@ import { DeleteColumnUseCase } from "../../../application/use-cases/column/Delet
 import { DeleteTableUseCase } from "../../../application/use-cases/table/DeleteTableUseCase";
 import { DbEngine } from "../../../domain/value-objects/DbEngine";
 import { toast } from "react-toastify";
+import { RelationType } from "../../../domain/value-objects/RelationType";
+import { UpdateRelationUseCase } from "../../../application/use-cases/relation/UpdateRelationUseCase";
+import { DeleteRelationUseCase } from "../../../application/use-cases/relation/DeleteRelationUseCase";
 
 const getEngineTypes = (engine: DbEngine) => {
   switch (engine) {
@@ -31,6 +34,80 @@ export default function PropertiesPanel() {
   const { activeProject, selectedElement, setSelectedElement, updateActiveProject } = useSchemaStore();
 
   if (!activeProject || !selectedElement) return null;
+
+  if (selectedElement.type === 'relation') {
+    const relation = activeProject.relations.find(r => r.id === selectedElement.relationId);
+    if (!relation) return null;
+
+    const sourceTable = activeProject.tables.find(t => t.id === relation.sourceTableId);
+    const targetTable = activeProject.tables.find(t => t.id === relation.targetTableId);
+
+    const handleUpdateRelation = (updates: { type?: RelationType; sourceColumnId?: string; targetColumnId?: string }) => {
+      updateActiveProject((project) => {
+        new UpdateRelationUseCase().execute(project, relation.id, updates);
+      });
+    };
+
+    const handleDeleteRelation = () => {
+      updateActiveProject((project) => {
+        new DeleteRelationUseCase().execute(project, relation.id);
+      });
+      setSelectedElement(null);
+      toast.warn("Relation deleted");
+    };
+
+    return (
+      <div className="w-80 border-l border-slate-200 bg-white flex flex-col h-full z-10 shadow-sm overflow-hidden animate-in slide-in-from-right duration-200">
+        <div className="p-4 border-b border-slate-200 flex justify-between items-center bg-slate-50">
+          <h2 className="font-semibold text-slate-700 text-sm">Relation Properties</h2>
+          <Button variant="ghost" size="icon" className="h-6 w-6" onClick={() => setSelectedElement(null)}>
+            <X className="w-4 h-4" />
+          </Button>
+        </div>
+        
+        <div className="flex-1 overflow-y-auto p-4 space-y-6">
+          <div className="space-y-4">
+            <div className="flex items-center justify-between">
+              <h3 className="text-xs font-semibold text-slate-500 uppercase tracking-wider">Settings</h3>
+              <Button variant="ghost" size="icon" className="h-6 w-6 text-red-500 hover:text-red-600 hover:bg-red-50" onClick={handleDeleteRelation}>
+                <Trash2 className="w-4 h-4" />
+              </Button>
+            </div>
+            
+            <div className="space-y-3">
+              <div className="space-y-1">
+                <Label className="text-[10px] text-slate-500 uppercase">Cardinality</Label>
+                <select
+                  value={relation.type}
+                  onChange={(e) => handleUpdateRelation({ type: e.target.value as RelationType })}
+                  className="h-8 text-sm px-2 w-full rounded-md border border-slate-200 bg-white text-slate-700 focus:outline-none focus:ring-1 focus:ring-blue-500"
+                >
+                  <option value={RelationType.OneToOne}>One to One (1:1)</option>
+                  <option value={RelationType.OneToMany}>One to Many (1:N)</option>
+                  <option value={RelationType.ManyToOne}>Many to One (N:1)</option>
+                  <option value={RelationType.ManyToMany}>Many to Many (N:N)</option>
+                </select>
+                <p className="text-[10px] text-slate-400 mt-1 italic">
+                  {relation.type === RelationType.ManyToMany && "Junction table will be generated automatically."}
+                </p>
+              </div>
+
+              <div className="pt-2 space-y-2">
+                <div className="flex items-center gap-2 text-xs">
+                  <span className="font-semibold text-slate-500 w-16">Source:</span>
+                  <span className="text-slate-700 bg-slate-100 px-2 py-0.5 rounded border border-slate-200 truncate">{sourceTable?.name}</span>
+                </div>
+                <div className="flex items-center gap-2 text-xs">
+                  <span className="font-semibold text-slate-500 w-16">Target:</span>
+                  <span className="text-slate-700 bg-slate-100 px-2 py-0.5 rounded border border-slate-200 truncate">{targetTable?.name}</span>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    );
+  }
 
   const table = activeProject.tables.find(t => t.id === selectedElement.tableId);
   if (!table) return null;

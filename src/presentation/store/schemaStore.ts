@@ -9,7 +9,7 @@ interface SchemaState {
   projectsList: Project[];
   isLoading: boolean;
 
-  selectedElement: { type: 'table' | 'column'; tableId: string; columnId?: string } | null;
+  selectedElement: { type: 'table' | 'column' | 'relation'; tableId?: string; columnId?: string; relationId?: string } | null;
 
   loadProjects: () => Promise<void>;
   createProject: (name: string, engine?: DbEngine) => Promise<void>;
@@ -20,7 +20,7 @@ interface SchemaState {
   deleteProject: (id: string) => Promise<void>;
   renameProject: (id: string, newName: string) => Promise<void>;
   exportProject: (projectId?: string) => Promise<void>;
-  setSelectedElement: (element: { type: 'table' | 'column'; tableId: string; columnId?: string } | null) => void;
+  setSelectedElement: (element: { type: 'table' | 'column' | 'relation'; tableId?: string; columnId?: string; relationId?: string } | null) => void;
 }
 
 export const useSchemaStore = create<SchemaState>((set, get) => ({

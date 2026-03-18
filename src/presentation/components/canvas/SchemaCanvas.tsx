@@ -19,6 +19,9 @@ import { useSchemaStore } from "../../store/schemaStore";
 import TableNode from "./TableNode";
 import RelationEdge from "./RelationEdge";
 import { CreateRelationUseCase } from "../../../application/use-cases/relation/CreateRelationUseCase";
+import { DeleteTableUseCase } from "../../../application/use-cases/table/DeleteTableUseCase";
+import { DeleteRelationUseCase } from "../../../application/use-cases/relation/DeleteRelationUseCase";
+import { toast } from "react-toastify";
 
 const nodeTypes: NodeTypes = {
   table: TableNode,
@@ -41,21 +44,38 @@ export default function SchemaCanvas() {
         id: table.id,
         type: "table",
         position: { x: table.x, y: table.y },
-        data: { label: table.name, columns: table.columns, id: table.id, isSelected: selectedElement?.tableId === table.id },
+        data: { 
+          label: table.name, 
+          columns: table.columns, 
+          id: table.id, 
+          isSelected: selectedElement?.type === 'table' && selectedElement?.tableId === table.id 
+        },
       }));
       setNodes(newNodes);
 
-      const newEdges: Edge[] = activeProject.relations.map(rel => ({
-        id: rel.id,
-        type: "relation",
-        source: rel.sourceTableId,
-        target: rel.targetTableId,
-        sourceHandle: `src-${rel.sourceTableId}`,
-        targetHandle: `tgt-${rel.targetTableId}`,
-      }));
+      const newEdges: Edge[] = activeProject.relations.map(rel => {
+        const isSelected = selectedElement?.type === 'relation' && selectedElement?.relationId === rel.id;
+        return {
+          id: rel.id,
+          type: "relation",
+          source: rel.sourceTableId,
+          target: rel.targetTableId,
+          sourceHandle: `src-${rel.sourceTableId}`,
+          targetHandle: `tgt-${rel.targetTableId}`,
+          data: { type: rel.type, isSelected },
+          animated: isSelected,
+          style: {
+            stroke: isSelected ? "#3b82f6" : "#cbd5e1",
+            strokeWidth: isSelected ? 3 : 2,
+            transition: 'stroke 0.2s, stroke-width 0.2s',
+          },
+          markerStart: rel.type === "ManyToMany" ? "url(#many)" : "url(#one)",
+          markerEnd: (rel.type === "OneToMany" || rel.type === "ManyToMany") ? "url(#many)" : "url(#one)",
+        };
+      });
       setEdges(newEdges);
     }
-  }, [activeProject, selectedElement?.tableId, setNodes, setEdges]);
+  }, [activeProject, selectedElement, setNodes, setEdges]);
 
   // Handle Drag & Drop to save position
   const onNodeDragStop = useCallback((_event: React.MouseEvent, node: Node) => {
@@ -67,6 +87,10 @@ export default function SchemaCanvas() {
       }
     });
   }, [updateActiveProject]);
+
+  const onEdgeClick = useCallback((_: React.MouseEvent, edge: Edge) => {
+    setSelectedElement({ type: 'relation', relationId: edge.id });
+  }, [setSelectedElement]);
 
   const onNodeClick = useCallback((_: React.MouseEvent, node: Node) => {
     setSelectedElement({ type: 'table', tableId: node.id });
@@ -88,6 +112,28 @@ export default function SchemaCanvas() {
     [updateActiveProject]
   );
 
+  const onNodesDelete = useCallback((deletedNodes: Node[]) => {
+    updateActiveProject((project) => {
+      deletedNodes.forEach(node => {
+        new DeleteTableUseCase().execute(project, node.id);
+      });
+    });
+    setSelectedElement(null);
+    toast.error(`${deletedNodes.length} Table(s) deleted`);
+  }, [updateActiveProject, setSelectedElement]);
+
+  const onEdgesDelete = useCallback((deletedEdges: Edge[]) => {
+    updateActiveProject((project) => {
+      deletedEdges.forEach(edge => {
+        new DeleteRelationUseCase().execute(project, edge.id);
+      });
+    });
+    if (selectedElement?.type === 'relation') {
+      setSelectedElement(null);
+    }
+    toast.warn(`${deletedEdges.length} Relation(s) deleted`);
+  }, [updateActiveProject, selectedElement, setSelectedElement]);
+
   if (!activeProject) {
     return <div className="flex items-center justify-center h-full bg-slate-50 text-slate-500">No active project loaded</div>;
   }
@@ -101,11 +147,27 @@ export default function SchemaCanvas() {
         onEdgesChange={onEdgesChange}
         onNodeDragStop={onNodeDragStop}
         onNodeClick={onNodeClick}
+        onEdgeClick={onEdgeClick}
         onConnect={onConnect}
+        onNodesDelete={onNodesDelete}
+        onEdgesDelete={onEdgesDelete}
         nodeTypes={nodeTypes}
         edgeTypes={edgeTypes}
         fitView
       >
+        <svg style={{ position: 'absolute', top: 0, left: 0, width: 0, height: 0 }}>
+          <defs>
+            {/* Many Marker (Crow's Foot) */}
+            <marker id="many" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+              <path d="M 0 0 L 10 5 L 0 10" fill="none" stroke="#64748b" strokeWidth="1.5" />
+              <path d="M 0 5 L 10 5" fill="none" stroke="#64748b" strokeWidth="1.5" />
+            </marker>
+            {/* One Marker */}
+            <marker id="one" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+              <path d="M 8 0 L 8 10" fill="none" stroke="#64748b" strokeWidth="1.5" />
+            </marker>
+          </defs>
+        </svg>
         <Background gap={16} size={1} />
         <Controls />
         <MiniMap />

@@ -18,11 +18,40 @@ export abstract class BaseSqlExporter implements IProjectExporter {
       sql += "\n";
     }
 
-    // 2. Add Foreign Keys (Relations)
+    // 2. Add Foreign Keys (Relations) and Junction Tables
     for (const relation of project.relations) {
-      sql += this.generateForeignKey(relation, project.tables);
+      if (relation.type === "ManyToMany") {
+        sql += this.generateJunctionTable(relation, project.tables);
+      } else {
+        sql += this.generateForeignKey(relation, project.tables);
+      }
       sql += "\n";
     }
+
+    return sql;
+  }
+
+  protected generateJunctionTable(relation: Relation, tables: Table[]): string {
+    const sourceTable = tables.find(t => t.id === relation.sourceTableId);
+    const targetTable = tables.find(t => t.id === relation.targetTableId);
+    
+    if (!sourceTable || !targetTable) return `-- ManyToMany junction skipped (missing info)`;
+
+    const junctionName = `${sourceTable.name}_${targetTable.name}`;
+    const sourcePk = sourceTable.columns.find(c => c.isPrimaryKey) || sourceTable.columns[0];
+    const targetPk = targetTable.columns.find(c => c.isPrimaryKey) || targetTable.columns[0];
+
+    const sourceFkName = `${sourceTable.name}_id`;
+    const targetFkName = `${targetTable.name}_id`;
+
+    let sql = `-- Junction Table for Many-to-Many between ${sourceTable.name} and ${targetTable.name}\n`;
+    sql += `CREATE TABLE ${this.formatIdentifier(junctionName)} (\n`;
+    sql += `  ${this.formatIdentifier(sourceFkName)} ${sourcePk ? this.formatType(sourcePk) : "INTEGER"},\n`;
+    sql += `  ${this.formatIdentifier(targetFkName)} ${targetPk ? this.formatType(targetPk) : "INTEGER"},\n`;
+    sql += `  PRIMARY KEY (${this.formatIdentifier(sourceFkName)}, ${this.formatIdentifier(targetFkName)}),\n`;
+    sql += `  FOREIGN KEY (${this.formatIdentifier(sourceFkName)}) REFERENCES ${this.formatIdentifier(sourceTable.name)}(${sourcePk ? this.formatIdentifier(sourcePk.name) : "id"}),\n`;
+    sql += `  FOREIGN KEY (${this.formatIdentifier(targetFkName)}) REFERENCES ${this.formatIdentifier(targetTable.name)}(${targetPk ? this.formatIdentifier(targetPk.name) : "id"})\n`;
+    sql += `);\n`;
 
     return sql;
   }
