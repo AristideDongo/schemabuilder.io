@@ -12,9 +12,11 @@ import {
   Edge,
   Node,
   NodeTypes,
-  EdgeTypes
+  EdgeTypes,
+  ColorMode
 } from "@xyflow/react";
 import "@xyflow/react/dist/style.css";
+import { useTheme } from "next-themes";
 import { useSchemaStore } from "../../store/schemaStore";
 import TableNode from "./TableNode";
 import RelationEdge from "./RelationEdge";
@@ -32,6 +34,7 @@ const edgeTypes: EdgeTypes = {
 };
 
 export default function SchemaCanvas() {
+  const { resolvedTheme } = useTheme();
   const { 
     activeProject, 
     updateActiveProject, 
@@ -85,7 +88,7 @@ export default function SchemaCanvas() {
           data: { type: rel.type, isSelected },
           animated: isSelected,
           style: {
-            stroke: isSelected ? "#3b82f6" : "#cbd5e1",
+            stroke: isSelected ? "#3b82f6" : (resolvedTheme === 'dark' ? '#475569' : '#cbd5e1'),
             strokeWidth: isSelected ? 3 : 2,
             transition: 'stroke 0.2s, stroke-width 0.2s',
           },
@@ -95,7 +98,7 @@ export default function SchemaCanvas() {
       });
       setEdges(newEdges);
     }
-  }, [activeProject, selectedElement, setNodes, setEdges]);
+  }, [activeProject, selectedElement, setNodes, setEdges, resolvedTheme]);
 
   // Handle Drag & Drop to save position
   const onNodeDragStop = useCallback((_event: React.MouseEvent, node: Node) => {
@@ -175,17 +178,18 @@ export default function SchemaCanvas() {
         edgeTypes={edgeTypes}
         deleteKeyCode={['Backspace', 'Delete']}
         fitView
+        colorMode={(resolvedTheme as ColorMode) || 'light'}
       >
         <svg style={{ position: 'absolute', top: 0, left: 0, width: 0, height: 0 }}>
           <defs>
             {/* Many Marker (Crow's Foot) */}
             <marker id="many" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
-              <path d="M 0 0 L 10 5 L 0 10" fill="none" stroke="#64748b" strokeWidth="1.5" />
-              <path d="M 0 5 L 10 5" fill="none" stroke="#64748b" strokeWidth="1.5" />
+              <path d="M 0 0 L 10 5 L 0 10" fill="none" className="stroke-muted-foreground" strokeWidth="1.5" />
+              <path d="M 0 5 L 10 5" fill="none" className="stroke-muted-foreground" strokeWidth="1.5" />
             </marker>
             {/* One Marker */}
             <marker id="one" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
-              <path d="M 8 0 L 8 10" fill="none" stroke="#64748b" strokeWidth="1.5" />
+              <path d="M 8 0 L 8 10" fill="none" className="stroke-muted-foreground" strokeWidth="1.5" />
             </marker>
           </defs>
         </svg>

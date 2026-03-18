@@ -6,15 +6,18 @@ import { Button } from "@/components/ui/button";
 import { 
   Save, Undo, Redo, Download, Home, Edit2, Check, X, Layout, 
   Image as ImageIcon, ChevronDown, FileCode, FileJson, FileText, FileType,
-  Maximize2
+  Maximize2, Sun, Moon, Monitor
 } from "lucide-react";
+import { useTheme } from "next-themes";
 import { 
   DropdownMenu, 
   DropdownMenuContent, 
   DropdownMenuItem, 
   DropdownMenuTrigger,
   DropdownMenuSeparator,
-  DropdownMenuLabel
+  DropdownMenuLabel,
+  DropdownMenuRadioGroup,
+  DropdownMenuRadioItem
 } from "../ui/dropdown-menu";
 import { useReactFlow, getNodesBounds, getViewportForBounds } from "@xyflow/react";
 import { toPng, toSvg } from "html-to-image";
@@ -23,6 +26,7 @@ import { useRouter } from "next/navigation";
 import { Input } from "@/components/ui/input";
 
 export default function Toolbar() {
+  const { theme, setTheme } = useTheme();
   const { getNodes, fitView } = useReactFlow();
   const { 
     activeProject, 
@@ -132,12 +136,12 @@ export default function Toolbar() {
   };
 
   return (
-    <div className="h-14 border-b border-slate-200 bg-white flex items-center justify-between px-4 z-10 relative shadow-sm">
+    <div className="h-14 border-b border-border bg-background flex items-center justify-between px-4 z-10 relative shadow-sm">
       <div className="flex items-center gap-3">
-        <Button variant="ghost" size="icon" onClick={() => router.push("/")} title="Back to Home" className="text-slate-500 hover:text-slate-800">
+        <Button variant="ghost" size="icon" onClick={() => router.push("/")} title="Back to Home" className="text-muted-foreground hover:text-foreground">
           <Home className="w-4 h-4" />
         </Button>
-        <div className="w-px h-5 bg-slate-200" />
+        <div className="w-px h-5 bg-border" />
         
         {isEditing ? (
           <div className="flex items-center gap-1 animate-in fade-in zoom-in-95 duration-100">
@@ -160,46 +164,71 @@ export default function Toolbar() {
           </div>
         ) : (
           <div className="flex items-center gap-2 group cursor-pointer" onClick={startEditing}>
-            <h1 className="font-semibold text-slate-800 group-hover:text-blue-700 transition-colors">{activeProject.name}</h1>
-            <Edit2 className="w-3.5 h-3.5 text-slate-400 opacity-0 group-hover:opacity-100 transition-opacity" />
+            <h1 className="font-semibold text-foreground group-hover:text-blue-500 transition-colors">{activeProject.name}</h1>
+            <Edit2 className="w-3.5 h-3.5 text-muted-foreground opacity-0 group-hover:opacity-100 transition-opacity" />
           </div>
         )}
         
-        <span className="text-xs text-slate-500 font-medium bg-slate-100 px-2 py-0.5 rounded-full border border-slate-200">
+        <span className="text-[10px] text-muted-foreground font-bold bg-secondary px-2 py-0.5 rounded-full border border-border uppercase tracking-wider">
           {activeProject.engine}
         </span>
       </div>
       
       <div className="flex items-center gap-2">
-        <Button variant="outline" size="icon" onClick={undo} disabled={!canUndo}>
+        <Button variant="outline" size="icon" onClick={undo} disabled={!canUndo} className="text-muted-foreground hover:text-foreground">
           <Undo className="w-4 h-4" />
         </Button>
-        <Button variant="outline" size="icon" onClick={redo} disabled={!canRedo}>
+        <Button variant="outline" size="icon" onClick={redo} disabled={!canRedo} className="text-muted-foreground hover:text-foreground">
           <Redo className="w-4 h-4" />
         </Button>
-        <Button variant="outline" size="icon" onClick={() => fitView()} title="Zoom to Fit (Ctrl+0)">
+        <Button variant="outline" size="icon" onClick={() => fitView()} title="Zoom to Fit (Ctrl+0)" className="text-muted-foreground hover:text-foreground">
           <Maximize2 className="w-4 h-4" />
         </Button>
-        <div className="w-px h-6 bg-slate-200 mx-1" />
+        <div className="w-px h-6 bg-border mx-1" />
         <Button 
-          variant={isAutoLayoutActive ? "default" : "secondary"} 
+          variant={isAutoLayoutActive ? "default" : "outline"} 
           onClick={toggleAutoLayout} 
           className={`gap-2 transition-all ${
             isAutoLayoutActive 
-              ? "bg-blue-600 hover:bg-blue-700 text-white" 
-              : "text-slate-700 bg-slate-100 hover:bg-slate-200 border-slate-200"
+              ? "bg-blue-600 hover:bg-blue-700 text-white border-transparent" 
+              : "text-muted-foreground hover:text-foreground bg-background"
           }`}
         >
           <Layout className="w-4 h-4" />
-          {isAutoLayoutActive ? "Auto Layout: ON" : "Auto Layout: OFF"}
+          <span className="text-xs font-medium">
+            {isAutoLayoutActive ? "Auto Layout: ON" : "Auto Layout: OFF"}
+          </span>
         </Button>
-        <div className="w-px h-6 bg-slate-200 mx-1" />
+        <div className="w-px h-6 bg-border mx-1" />
         
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
-            <Button variant="outline" className="gap-2">
+            <Button variant="outline" size="icon" className="text-muted-foreground hover:text-foreground">
+              <Sun className="h-[1.2rem] w-[1.2rem] rotate-0 scale-100 transition-all dark:-rotate-90 dark:scale-0" />
+              <Moon className="absolute h-[1.2rem] w-[1.2rem] rotate-90 scale-0 transition-all dark:rotate-0 dark:scale-100" />
+              <span className="sr-only">Toggle theme</span>
+            </Button>
+          </DropdownMenuTrigger>
+          <DropdownMenuContent align="end">
+            <DropdownMenuRadioGroup value={theme} onValueChange={setTheme}>
+              <DropdownMenuRadioItem value="light" className="gap-2">
+                <Sun className="w-4 h-4" /> Light
+              </DropdownMenuRadioItem>
+              <DropdownMenuRadioItem value="dark" className="gap-2">
+                <Moon className="w-4 h-4" /> Dark
+              </DropdownMenuRadioItem>
+              <DropdownMenuRadioItem value="system" className="gap-2">
+                <Monitor className="w-4 h-4" /> System
+              </DropdownMenuRadioItem>
+            </DropdownMenuRadioGroup>
+          </DropdownMenuContent>
+        </DropdownMenu>
+
+        <DropdownMenu>
+          <DropdownMenuTrigger asChild>
+            <Button variant="outline" className="gap-2 text-muted-foreground hover:text-foreground">
               <Download className="w-4 h-4" />
-              Export
+              <span className="text-xs font-medium">Export</span>
               <ChevronDown className="w-3 h-3 opacity-50" />
             </Button>
           </DropdownMenuTrigger>

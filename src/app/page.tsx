@@ -10,16 +10,28 @@ import {
   Trash2,
   Download,
   Edit2,
+  Sun,
+  Moon,
+  Monitor
 } from "lucide-react";
 import { useRouter } from "next/navigation";
+import { useTheme } from "next-themes";
 import { DbEngine } from "@/domain/value-objects/DbEngine";
 import { toast } from "react-toastify";
 import { ENGINE_COLORS } from "@/presentation/lib/databaseOptions";
 import { DeleteProjectModal } from "@/presentation/components/modals/DeleteProjectModal";
 import { RenameProjectModal } from "@/presentation/components/modals/RenameProjectModal";
 import { CreateProjectModal } from "@/presentation/components/modals/CreateProjectModal";
+import { 
+  DropdownMenu, 
+  DropdownMenuContent, 
+  DropdownMenuRadioGroup, 
+  DropdownMenuRadioItem, 
+  DropdownMenuTrigger 
+} from "@/presentation/components/ui/dropdown-menu";
 
 export default function Home() {
+  const { theme, setTheme } = useTheme();
   const router = useRouter();
   const {
     projectsList,
@@ -90,14 +102,14 @@ export default function Home() {
 
   if (isLoading && projectsList.length === 0) {
     return (
-      <div className="flex h-screen items-center justify-center bg-slate-50 text-slate-500">
+      <div className="flex h-screen items-center justify-center bg-background text-muted-foreground">
         Loading projects...
       </div>
     );
   }
 
   return (
-    <div className="min-h-screen bg-slate-50 p-8 font-sans">
+    <div className="min-h-screen bg-background p-8 font-sans">
       <div className="max-w-5xl mx-auto">
         {/* Header */}
         <header className="flex justify-between items-center mb-12">
@@ -105,43 +117,68 @@ export default function Home() {
             <div className="w-10 h-10 bg-blue-600 rounded-lg flex items-center justify-center shadow-md">
               <Database className="w-5 h-5 text-white" />
             </div>
-            <h1 className="text-2xl font-bold text-slate-800 tracking-tight">
+            <h1 className="text-2xl font-bold text-foreground tracking-tight">
               SchemaBuilder<span className="text-blue-600">.io</span>
             </h1>
           </div>
-          <Button
-            onClick={openCreateModal}
-            className="gap-2 bg-blue-600 hover:bg-blue-700 text-white shadow-sm"
-          >
-            <Plus className="w-4 h-4" /> New Project
-          </Button>
+          <div className="flex items-center gap-3">
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <Button variant="outline" size="icon" className="text-muted-foreground hover:text-foreground">
+                  <Sun className="h-[1.2rem] w-[1.2rem] rotate-0 scale-100 transition-all dark:-rotate-90 dark:scale-0" />
+                  <Moon className="absolute h-[1.2rem] w-[1.2rem] rotate-90 scale-0 transition-all dark:rotate-0 dark:scale-100" />
+                  <span className="sr-only">Toggle theme</span>
+                </Button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent align="end">
+                <DropdownMenuRadioGroup value={theme} onValueChange={setTheme}>
+                  <DropdownMenuRadioItem value="light" className="gap-2">
+                    <Sun className="w-4 h-4" /> Light
+                  </DropdownMenuRadioItem>
+                  <DropdownMenuRadioItem value="dark" className="gap-2">
+                    <Moon className="w-4 h-4" /> Dark
+                  </DropdownMenuRadioItem>
+                  <DropdownMenuRadioItem value="system" className="gap-2">
+                    <Monitor className="w-4 h-4" /> System
+                  </DropdownMenuRadioItem>
+                </DropdownMenuRadioGroup>
+              </DropdownMenuContent>
+            </DropdownMenu>
+
+            <Button
+              onClick={openCreateModal}
+              className="gap-2 bg-blue-600 hover:bg-blue-700 text-white shadow-sm"
+            >
+              <Plus className="w-4 h-4" /> New Project
+            </Button>
+          </div>
         </header>
 
         {/* Projects Grid */}
         <section>
-          <h2 className="text-lg font-semibold text-slate-700 mb-4 px-1">
+          <h2 className="text-lg font-semibold text-foreground/80 mb-4 px-1">
             Recent Projects
           </h2>
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
             {projectsList.map((project) => (
               <div
                 key={project.id}
-                className="group border border-slate-200 rounded-xl p-5 bg-white hover:border-blue-300 hover:shadow-lg transition-all cursor-pointer relative overflow-hidden"
+                className="group border border-border rounded-xl p-5 bg-card hover:border-blue-500/50 hover:shadow-xl hover:shadow-blue-500/5 transition-all cursor-pointer relative overflow-hidden"
                 onClick={() => router.push(`/projects/${project.id}`)}
               >
                 <div className="absolute top-0 left-0 w-full h-1 bg-linear-to-r from-blue-400 to-indigo-500 opacity-0 group-hover:opacity-100 transition-opacity" />
-                <h3 className="font-semibold text-lg text-slate-800 mb-3 group-hover:text-blue-700 transition-colors pr-4">
+                <h3 className="font-semibold text-lg text-foreground mb-3 group-hover:text-blue-500 transition-colors pr-4">
                   {project.name}
                 </h3>
                 <div className="flex justify-between items-center">
                   <div className="flex items-center gap-2">
                     <span
-                      className={`border px-2.5 py-1 rounded-md font-medium text-xs ${ENGINE_COLORS[project.engine] ?? "text-slate-600 bg-slate-50 border-slate-200"}`}
+                      className={`border px-2 py-0.5 rounded-md font-bold text-[10px] uppercase tracking-wider ${ENGINE_COLORS[project.engine] ?? "text-muted-foreground bg-muted border-border"}`}
                     >
                       {project.engine}
                     </span>
-                    <span className="flex items-center gap-1 text-slate-400 text-xs">
-                      <Calendar className="w-3.5 h-3.5" />
+                    <span className="flex items-center gap-1 text-muted-foreground/60 text-[10px] font-medium uppercase tracking-tight">
+                      <Calendar className="w-3 h-3" />
                       {new Date(project.updatedAt).toLocaleDateString()}
                     </span>
                   </div>
@@ -152,14 +189,14 @@ export default function Home() {
                   >
                     <button
                       onClick={(e) => openRenameModal(e, project.id)}
-                      className="p-1.5 rounded-lg text-slate-400 hover:text-blue-600 hover:bg-blue-50 transition-colors"
+                      className="p-1.5 rounded-lg text-muted-foreground hover:text-blue-500 hover:bg-blue-500/10 transition-colors"
                       title="Rename"
                     >
                       <Edit2 className="w-4 h-4" />
                     </button>
                     <button
                       onClick={(e) => handleExport(e, project.id)}
-                      className="p-1.5 rounded-lg text-slate-400 hover:text-blue-600 hover:bg-blue-50 transition-colors"
+                      className="p-1.5 rounded-lg text-muted-foreground hover:text-blue-500 hover:bg-blue-500/10 transition-colors"
                       title="Export"
                     >
                       <Download className="w-4 h-4" />
@@ -169,7 +206,7 @@ export default function Home() {
                         e.stopPropagation();
                         setConfirmDeleteId(project.id);
                       }}
-                      className="p-1.5 rounded-lg text-slate-400 hover:text-red-600 hover:bg-red-50 transition-colors"
+                      className="p-1.5 rounded-lg text-muted-foreground hover:text-red-500 hover:bg-red-500/10 transition-colors"
                       title="Delete"
                     >
                       <Trash2 className="w-4 h-4" />
@@ -179,20 +216,20 @@ export default function Home() {
               </div>
             ))}
             {projectsList.length === 0 && (
-              <div className="col-span-full text-center py-16 text-slate-500 bg-white rounded-xl border-2 border-dashed border-slate-200 flex flex-col items-center justify-center gap-4">
-                <Database className="w-12 h-12 text-slate-300" />
+              <div className="col-span-full text-center py-16 text-muted-foreground bg-card rounded-xl border-2 border-dashed border-border flex flex-col items-center justify-center gap-4">
+                <Database className="w-12 h-12 text-muted/30" />
                 <div>
-                  <h3 className="text-lg font-medium text-slate-700">
+                  <h3 className="text-lg font-medium text-foreground/80">
                     No projects yet
                   </h3>
-                  <p className="text-sm mt-1">
+                  <p className="text-sm mt-1 text-muted-foreground/70">
                     Create your first schema design project to get started.
                   </p>
                 </div>
                 <Button
                   onClick={openCreateModal}
                   variant="outline"
-                  className="mt-2 text-blue-600 border-blue-200 hover:bg-blue-50"
+                  className="mt-2 text-blue-500 border-blue-500/30 hover:bg-blue-500/10"
                 >
                   Create Project
                 </Button>

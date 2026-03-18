@@ -57,9 +57,9 @@ export default function PropertiesPanel() {
     };
 
     return (
-      <div className="w-80 border-l border-slate-200 bg-white flex flex-col h-full z-10 shadow-sm overflow-hidden animate-in slide-in-from-right duration-200">
-        <div className="p-4 border-b border-slate-200 flex justify-between items-center bg-slate-50">
-          <h2 className="font-semibold text-slate-700 text-sm">Relation Properties</h2>
+      <div className="w-80 border-l border-border bg-background flex flex-col h-full z-10 shadow-sm overflow-hidden animate-in slide-in-from-right duration-200">
+        <div className="p-4 border-b border-border flex justify-between items-center bg-muted/30">
+          <h2 className="font-semibold text-foreground/80 text-sm">Relation Properties</h2>
           <Button variant="ghost" size="icon" className="h-6 w-6" onClick={() => setSelectedElement(null)}>
             <X className="w-4 h-4" />
           </Button>
@@ -68,38 +68,38 @@ export default function PropertiesPanel() {
         <div className="flex-1 overflow-y-auto p-4 space-y-6">
           <div className="space-y-4">
             <div className="flex items-center justify-between">
-              <h3 className="text-xs font-semibold text-slate-500 uppercase tracking-wider">Settings</h3>
-              <Button variant="ghost" size="icon" className="h-6 w-6 text-red-500 hover:text-red-600 hover:bg-red-50" onClick={handleDeleteRelation}>
+              <h3 className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">Settings</h3>
+              <Button variant="ghost" size="icon" className="h-6 w-6 text-red-500 hover:text-red-600 hover:bg-red-500/10" onClick={handleDeleteRelation}>
                 <Trash2 className="w-4 h-4" />
               </Button>
             </div>
             
             <div className="space-y-3">
               <div className="space-y-1">
-                <Label className="text-[10px] text-slate-500 uppercase">Cardinality</Label>
+                <Label className="text-[10px] text-muted-foreground uppercase">Cardinality</Label>
                 <select
                   value={relation.type}
                   onChange={(e) => handleUpdateRelation({ type: e.target.value as RelationType })}
-                  className="h-8 text-sm px-2 w-full rounded-md border border-slate-200 bg-white text-slate-700 focus:outline-none focus:ring-1 focus:ring-blue-500"
+                  className="h-8 text-sm px-2 w-full rounded-md border border-border bg-card text-foreground focus:outline-none focus:ring-1 focus:ring-blue-500"
                 >
                   <option value={RelationType.OneToOne}>One to One (1:1)</option>
                   <option value={RelationType.OneToMany}>One to Many (1:N)</option>
                   <option value={RelationType.ManyToOne}>Many to One (N:1)</option>
                   <option value={RelationType.ManyToMany}>Many to Many (N:N)</option>
                 </select>
-                <p className="text-[10px] text-slate-400 mt-1 italic">
+                <p className="text-[10px] text-muted-foreground/60 mt-1 italic">
                   {relation.type === RelationType.ManyToMany && "Junction table will be generated automatically."}
                 </p>
               </div>
 
               <div className="pt-2 space-y-2">
                 <div className="flex items-center gap-2 text-xs">
-                  <span className="font-semibold text-slate-500 w-16">Source:</span>
-                  <span className="text-slate-700 bg-slate-100 px-2 py-0.5 rounded border border-slate-200 truncate">{sourceTable?.name}</span>
+                  <span className="font-semibold text-muted-foreground w-16">Source:</span>
+                  <span className="text-foreground/90 bg-muted px-2 py-0.5 rounded border border-border truncate">{sourceTable?.name}</span>
                 </div>
                 <div className="flex items-center gap-2 text-xs">
-                  <span className="font-semibold text-slate-500 w-16">Target:</span>
-                  <span className="text-slate-700 bg-slate-100 px-2 py-0.5 rounded border border-slate-200 truncate">{targetTable?.name}</span>
+                  <span className="font-semibold text-muted-foreground w-16">Target:</span>
+                  <span className="text-foreground/90 bg-muted px-2 py-0.5 rounded border border-border truncate">{targetTable?.name}</span>
                 </div>
               </div>
             </div>
@@ -149,9 +149,9 @@ export default function PropertiesPanel() {
   };
 
   return (
-    <div className="w-80 border-l border-slate-200 bg-white flex flex-col h-full z-10 shadow-sm overflow-hidden">
-      <div className="p-4 border-b border-slate-200 flex justify-between items-center bg-slate-50">
-        <h2 className="font-semibold text-slate-700 text-sm">Properties</h2>
+    <div className="w-80 border-l border-border bg-background flex flex-col h-full z-10 shadow-sm overflow-hidden">
+      <div className="p-4 border-b border-border flex justify-between items-center bg-muted/30">
+        <h2 className="font-semibold text-foreground/80 text-sm">Properties</h2>
         <Button variant="ghost" size="icon" className="h-6 w-6" onClick={() => setSelectedElement(null)}>
           <X className="w-4 h-4" />
         </Button>
@@ -160,13 +160,13 @@ export default function PropertiesPanel() {
       <div className="flex-1 overflow-y-auto p-4 space-y-6">
         <div className="space-y-4">
           <div className="flex items-center justify-between">
-            <h3 className="text-xs font-semibold text-slate-500 uppercase tracking-wider">Table Settings</h3>
-            <Button variant="ghost" size="icon" className="h-6 w-6 text-red-500 hover:text-red-600 hover:bg-red-50" onClick={handleDeleteTable}>
+            <h3 className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">Table Settings</h3>
+            <Button variant="ghost" size="icon" className="h-6 w-6 text-red-500 hover:text-red-600 hover:bg-red-500/10" onClick={handleDeleteTable}>
               <Trash2 className="w-4 h-4" />
             </Button>
           </div>
           <div className="space-y-2">
-            <Label htmlFor="tableName" className="text-xs text-slate-600">Table Name</Label>
+            <Label htmlFor="tableName" className="text-xs text-muted-foreground">Table Name</Label>
             <Input 
               id="tableName" 
               value={table.name} 
@@ -175,22 +175,22 @@ export default function PropertiesPanel() {
             />
           </div>
           <div className="space-y-2">
-            <Label htmlFor="tableNote" className="text-xs text-slate-600">Note</Label>
+            <Label htmlFor="tableNote" className="text-xs text-muted-foreground">Note</Label>
             <Input 
               id="tableNote" 
               value={table.note || ''} 
               onChange={(e) => handleUpdateTable('note', e.target.value)}
-              className="h-8 text-sm placeholder:text-slate-300"
+              className="h-8 text-sm placeholder:text-muted-foreground/30"
               placeholder="Added to export comments"
             />
           </div>
         </div>
 
-        <div className="h-px bg-slate-200" />
+        <div className="h-px bg-border" />
 
         <div className="space-y-4">
           <div className="flex justify-between items-center">
-            <h3 className="text-xs font-semibold text-slate-500 uppercase tracking-wider">Columns</h3>
+            <h3 className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">Columns</h3>
             <Button variant="outline" size="sm" className="h-7 text-xs gap-1" onClick={handleAddColumn}>
               <Plus className="w-3 h-3" /> Add
             </Button>
@@ -198,11 +198,11 @@ export default function PropertiesPanel() {
           
           <div className="space-y-3">
             {table.columns.map(col => (
-              <div key={col.id} className="p-3 border border-slate-200 rounded-md bg-slate-50 space-y-3 relative group">
+              <div key={col.id} className="p-3 border border-border rounded-md bg-muted/40 space-y-3 relative group">
                 <Button 
                   variant="ghost" 
                   size="icon" 
-                  className="h-5 w-5 absolute top-2 right-2 opacity-0 group-hover:opacity-100 transition-opacity text-slate-400 hover:text-red-500"
+                  className="h-5 w-5 absolute top-2 right-2 opacity-0 group-hover:opacity-100 transition-opacity text-muted-foreground hover:text-red-500"
                   onClick={() => handleDeleteColumn(col.id)}
                 >
                   <Trash2 className="w-3 h-3" />
@@ -210,7 +210,7 @@ export default function PropertiesPanel() {
                 
                 <div className="space-y-2 pr-4">
                   <div className="space-y-1">
-                    <Label className="text-[10px] text-slate-500 uppercase">Name</Label>
+                    <Label className="text-[10px] text-muted-foreground uppercase">Name</Label>
                     <Input 
                       value={col.name} 
                       onChange={(e) => handleUpdateColumn(col.id, 'name', e.target.value)}
@@ -218,11 +218,11 @@ export default function PropertiesPanel() {
                     />
                   </div>
                   <div className="space-y-1">
-                    <Label className="text-[10px] text-slate-500 uppercase">Type</Label>
+                    <Label className="text-[10px] text-muted-foreground uppercase">Type</Label>
                     <select
                       value={col.type}
                       onChange={(e) => handleUpdateColumn(col.id, 'type', e.target.value)}
-                      className="h-7 text-xs px-2 font-mono w-full rounded-md border border-slate-200 bg-white text-slate-700 focus:outline-none focus:ring-1 focus:ring-blue-500"
+                      className="h-7 text-xs px-2 font-mono w-full rounded-md border border-border bg-card text-foreground focus:outline-none focus:ring-1 focus:ring-blue-500"
                     >
                       {getEngineTypes(activeProject.engine).map(t => (
                         <option key={t} value={t}>{t}</option>
@@ -232,28 +232,28 @@ export default function PropertiesPanel() {
                 </div>
                 
                 <div className="flex gap-4 pt-1">
-                  <label className="flex items-center gap-1.5 text-xs text-slate-600 cursor-pointer">
+                  <label className="flex items-center gap-1.5 text-xs text-foreground/70 cursor-pointer">
                     <input 
                       type="checkbox" 
-                      className="rounded border-slate-300 text-blue-600 focus:ring-blue-500 h-3 w-3"
+                      className="rounded border-border bg-card text-blue-600 focus:ring-blue-500 h-3 w-3"
                       checked={col.isPrimaryKey}
                       onChange={(e) => handleUpdateColumn(col.id, 'isPrimaryKey', e.target.checked)}
                     />
                     PK
                   </label>
-                  <label className="flex items-center gap-1.5 text-xs text-slate-600 cursor-pointer">
+                  <label className="flex items-center gap-1.5 text-xs text-foreground/70 cursor-pointer">
                     <input 
                       type="checkbox" 
-                      className="rounded border-slate-300 text-blue-600 focus:ring-blue-500 h-3 w-3"
+                      className="rounded border-border bg-card text-blue-600 focus:ring-blue-500 h-3 w-3"
                       checked={col.isNullable}
                       onChange={(e) => handleUpdateColumn(col.id, 'isNullable', e.target.checked)}
                     />
                     Null
                   </label>
-                  <label className="flex items-center gap-1.5 text-xs text-slate-600 cursor-pointer">
+                  <label className="flex items-center gap-1.5 text-xs text-foreground/70 cursor-pointer">
                     <input 
                       type="checkbox" 
-                      className="rounded border-slate-300 text-blue-600 focus:ring-blue-500 h-3 w-3"
+                      className="rounded border-border bg-card text-blue-600 focus:ring-blue-500 h-3 w-3"
                       checked={col.isUnique}
                       onChange={(e) => handleUpdateColumn(col.id, 'isUnique', e.target.checked)}
                     />
@@ -263,7 +263,7 @@ export default function PropertiesPanel() {
               </div>
             ))}
             {table.columns.length === 0 && (
-              <div className="text-center py-4 text-xs text-slate-400 border border-dashed border-slate-200 rounded-md">
+              <div className="text-center py-4 text-xs text-muted-foreground/60 border border-dashed border-border rounded-md">
                 No columns defined.
               </div>
             )}

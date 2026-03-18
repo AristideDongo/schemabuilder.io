@@ -21,20 +21,20 @@ export function DeleteProjectModal({
   if (!isOpen) return null;
 
   return (
-    <div className="fixed inset-0 bg-black/40 backdrop-blur-sm flex items-center justify-center z-50 p-4">
-      <div className="bg-white rounded-2xl shadow-2xl w-full max-w-sm p-6 text-center relative">
+    <div className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-50 p-4">
+      <div className="bg-card rounded-2xl shadow-2xl w-full max-w-sm p-6 text-center relative border border-border">
         <button
           onClick={onClose}
-          className="absolute top-4 right-4 text-slate-400 hover:text-slate-600"
+          className="absolute top-4 right-4 text-muted-foreground hover:text-foreground"
         >
           <X className="w-5 h-5" />
         </button>
-        <div className="w-12 h-12 bg-red-100 rounded-full flex items-center justify-center mx-auto mb-4">
-          <AlertTriangle className="w-6 h-6 text-red-600" />
+        <div className="w-12 h-12 bg-red-500/10 rounded-full flex items-center justify-center mx-auto mb-4">
+          <AlertTriangle className="w-6 h-6 text-red-500" />
         </div>
-        <h2 className="text-lg font-bold text-slate-800 mb-2">Delete Project?</h2>
-        <p className="text-sm text-slate-500 mb-6">
-          <span className="font-semibold text-slate-700">&quot;{projectName}&quot;</span>{" "}
+        <h2 className="text-lg font-bold text-foreground mb-2">Delete Project?</h2>
+        <p className="text-sm text-muted-foreground mb-6">
+          <span className="font-semibold text-foreground/90">&quot;{projectName}&quot;</span>{" "}
           will be permanently deleted. This cannot be undone.
         </p>
         <div className="flex gap-3">

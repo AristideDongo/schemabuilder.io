@@ -37,10 +37,10 @@ export default function Sidebar() {
   };
 
   return (
-    <div className="w-64 border-r border-slate-200 bg-white flex flex-col h-full z-10 shadow-sm">
-      <div className="p-4 border-b border-slate-200 flex justify-between items-center bg-slate-50/80">
-        <h2 className="font-semibold text-slate-700 text-sm uppercase tracking-wider">Tables</h2>
-        <Button variant="ghost" size="icon" className="h-7 w-7 text-blue-600 hover:text-blue-700 hover:bg-blue-50" onClick={handleAddTable}>
+    <div className="w-64 border-r border-border bg-background flex flex-col h-full z-10 shadow-sm">
+      <div className="p-4 border-b border-border flex justify-between items-center bg-muted/30">
+        <h2 className="font-semibold text-foreground/70 text-sm uppercase tracking-wider">Tables</h2>
+        <Button variant="ghost" size="icon" className="h-7 w-7 text-blue-500 hover:text-blue-600 hover:bg-blue-500/10" onClick={handleAddTable}>
           <Plus className="w-4 h-4" />
         </Button>
       </div>
@@ -54,17 +54,17 @@ export default function Sidebar() {
               onClick={() => handleTableClick(table.id)}
               className={`flex items-center justify-between p-2 rounded-md cursor-pointer text-sm transition-all group ${
                 isSelected 
-                  ? "bg-blue-50 text-blue-700 border border-blue-100 shadow-sm" 
-                  : "text-slate-700 hover:bg-slate-100 border border-transparent"
+                  ? "bg-blue-500/10 text-blue-500 border border-blue-500/20 shadow-sm" 
+                  : "text-foreground/80 hover:bg-muted border border-transparent"
               }`}
             >
               <div className="flex items-center gap-3 truncate pr-2">
-                <TableIcon className={`w-4 h-4 ${isSelected ? "text-blue-500" : "text-slate-400"}`} />
+                <TableIcon className={`w-4 h-4 ${isSelected ? "text-blue-500" : "text-muted-foreground"}`} />
                 <span className="truncate font-medium">{table.name}</span>
               </div>
               <button 
                 onClick={(e) => handleDeleteTable(e, table.id)}
-                className="opacity-0 group-hover:opacity-100 p-1 text-slate-400 hover:text-red-500 hover:bg-red-50 rounded transition-all"
+                className="opacity-0 group-hover:opacity-100 p-1 text-muted-foreground hover:text-red-500 hover:bg-red-500/10 rounded transition-all"
                 title="Delete table"
               >
                 <Trash2 className="w-3.5 h-3.5" />
@@ -73,7 +73,7 @@ export default function Sidebar() {
           );
         })}
         {activeProject.tables.length === 0 && (
-          <div className="text-xs text-slate-400 text-center py-6">
+          <div className="text-xs text-muted-foreground/60 text-center py-6">
             No tables yet. Click + to add one.
           </div>
         )}

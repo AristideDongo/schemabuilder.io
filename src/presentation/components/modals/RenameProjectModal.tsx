@@ -23,24 +23,24 @@ export function RenameProjectModal({
   if (!isOpen) return null;
 
   return (
-    <div className="fixed inset-0 bg-black/40 backdrop-blur-sm flex items-center justify-center z-50 p-4">
-      <div className="bg-white rounded-2xl shadow-2xl w-full max-w-sm p-6 relative">
+    <div className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-50 p-4">
+      <div className="bg-card rounded-2xl shadow-2xl w-full max-w-sm p-6 relative border border-border">
         <button
           onClick={onClose}
-          className="absolute top-4 right-4 text-slate-400 hover:text-slate-600"
+          className="absolute top-4 right-4 text-muted-foreground hover:text-foreground"
         >
           <X className="w-5 h-5" />
         </button>
-        <h2 className="text-lg font-bold text-slate-800 mb-4">Rename Project</h2>
+        <h2 className="text-lg font-bold text-foreground mb-4">Rename Project</h2>
         <div className="mb-6">
-          <label className="block text-xs font-semibold text-slate-500 uppercase tracking-wider mb-1.5">
+          <label className="block text-xs font-semibold text-muted-foreground uppercase tracking-wider mb-1.5">
             New Name
           </label>
           <Input
             value={name}
             onChange={(e) => setName(e.target.value)}
             placeholder="Project Name"
-            className="h-10"
+            className="h-10 bg-background"
             autoFocus
             onKeyDown={(e) => {
               if (e.key === "Enter" && name.trim()) {
@@ -56,7 +56,7 @@ export function RenameProjectModal({
           <Button
             onClick={() => onConfirm(name.trim())}
             disabled={isLoading || !name.trim()}
-            className="flex-1 bg-blue-600 hover:bg-blue-700 text-white"
+            className="flex-1 bg-blue-600 hover:bg-blue-700 text-white shadow-sm"
           >
             {isLoading ? "Saving..." : "Rename"}
           </Button>

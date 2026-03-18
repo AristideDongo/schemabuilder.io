@@ -34,35 +34,35 @@ export function CreateProjectModal({
   };
 
   return (
-    <div className="fixed inset-0 bg-black/40 backdrop-blur-sm flex items-center justify-center z-50 p-4">
-      <div className="bg-white rounded-2xl shadow-2xl w-full max-w-lg p-6 relative">
+    <div className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-50 p-4">
+      <div className="bg-card rounded-2xl shadow-2xl w-full max-w-lg p-6 relative border border-border">
         <button
           onClick={onClose}
-          className="absolute top-4 right-4 text-slate-400 hover:text-slate-600"
+          className="absolute top-4 right-4 text-muted-foreground hover:text-foreground"
         >
           <X className="w-5 h-5" />
         </button>
-        <h2 className="text-xl font-bold text-slate-800 mb-1">New Project</h2>
-        <p className="text-sm text-slate-500 mb-6">
+        <h2 className="text-xl font-bold text-foreground mb-1">New Project</h2>
+        <p className="text-sm text-muted-foreground mb-6">
           Choose a database engine to get the right column types and SQL syntax.
         </p>
 
         <div className="mb-5">
-          <label className="block text-xs font-semibold text-slate-500 uppercase tracking-wider mb-1.5">
+          <label className="block text-xs font-semibold text-muted-foreground uppercase tracking-wider mb-1.5">
             Project Name
           </label>
           <Input
             value={projectName}
             onChange={(e) => setProjectName(e.target.value)}
             placeholder="My Schema"
-            className="h-10"
+            className="h-10 bg-background"
             autoFocus
             onKeyDown={(e) => e.key === "Enter" && handleCreate()}
           />
         </div>
 
         <div className="mb-6">
-          <label className="block text-xs font-semibold text-slate-500 uppercase tracking-wider mb-2">
+          <label className="block text-xs font-semibold text-muted-foreground uppercase tracking-wider mb-2">
             Database Engine
           </label>
           <div className="grid grid-cols-2 gap-2">
@@ -72,8 +72,8 @@ export function CreateProjectModal({
                 onClick={() => setSelectedEngine(engine)}
                 className={`flex items-center gap-3 p-3 rounded-xl border-2 text-left transition-all ${
                   selectedEngine === engine
-                    ? "border-blue-500 bg-blue-50 shadow-sm"
-                    : "border-slate-200 hover:border-slate-300 hover:bg-slate-50"
+                    ? "border-blue-500 bg-blue-500/10 shadow-sm"
+                    : "border-border hover:border-blue-500/30 hover:bg-muted/50"
                 }`}
               >
                 <div
@@ -82,10 +82,10 @@ export function CreateProjectModal({
                   <Database className="w-4 h-4 text-white" />
                 </div>
                 <div className="min-w-0">
-                  <div className="font-semibold text-sm text-slate-800">
+                  <div className="font-semibold text-sm text-foreground">
                     {label}
                   </div>
-                  <div className="text-[10px] text-slate-500 truncate">
+                  <div className="text-[10px] text-muted-foreground truncate">
                     {description}
                   </div>
                 </div>

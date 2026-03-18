@@ -53,7 +53,7 @@ export default function RelationEdge({
             <div className={`px-1.5 py-0.5 rounded-full text-[10px] font-bold border shadow-sm ${
               data.isSelected 
                 ? "bg-blue-500 text-white border-blue-600" 
-                : "bg-white text-slate-500 border-slate-200"
+                : "bg-card text-muted-foreground border-border"
             }`}>
               {getLabelText(data.type as string)}
             </div>
