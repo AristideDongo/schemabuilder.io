@@ -32,10 +32,30 @@ const edgeTypes: EdgeTypes = {
 };
 
 export default function SchemaCanvas() {
-  const { activeProject, updateActiveProject, setSelectedElement, selectedElement } = useSchemaStore();
+  const { 
+    activeProject, 
+    updateActiveProject, 
+    setSelectedElement, 
+    selectedElement,
+    isAutoLayoutActive,
+    autoLayout
+  } = useSchemaStore();
 
   const [nodes, setNodes, onNodesChange] = useNodesState<Node>([]);
   const [edges, setEdges, onEdgesChange] = useEdgesState<Edge>([]);
+
+  // Auto-layout trigger on structure change
+  useEffect(() => {
+    if (isAutoLayoutActive && activeProject) {
+      autoLayout();
+    }
+  }, [
+    activeProject?.tables.length, 
+    activeProject?.relations.length, 
+    isAutoLayoutActive, 
+    autoLayout,
+    activeProject
+  ]);
 
   // Sync state from Zustand to React Flow Local State
   useEffect(() => {

@@ -3,7 +3,7 @@
 import { useState, useRef } from "react";
 import { useSchemaStore } from "../../store/schemaStore";
 import { Button } from "@/components/ui/button";
-import { Save, Undo, Redo, Download, Home, Edit2, Check, X } from "lucide-react";
+import { Save, Undo, Redo, Download, Home, Edit2, Check, X, Layout } from "lucide-react";
 import { toast } from "react-toastify";
 import { useRouter } from "next/navigation";
 import { Input } from "@/components/ui/input";
@@ -17,7 +17,9 @@ export default function Toolbar() {
     undo,
     redo,
     past,
-    future
+    future,
+    isAutoLayoutActive,
+    toggleAutoLayout
   } = useSchemaStore();
   
   const canUndo = past.length > 0;
@@ -31,8 +33,7 @@ export default function Toolbar() {
   if (!activeProject) return null;
 
   const handleSave = async () => {
-    await saveCurrentProject();
-    toast.success("Project saved!", { autoClose: 2000 });
+    await saveCurrentProject(true);
   };
 
   const handleExport = async () => {
@@ -107,6 +108,18 @@ export default function Toolbar() {
           <Redo className="w-4 h-4" />
         </Button>
         <div className="w-px h-6 bg-slate-200 mx-1" />
+        <Button 
+          variant={isAutoLayoutActive ? "default" : "secondary"} 
+          onClick={toggleAutoLayout} 
+          className={`gap-2 transition-all ${
+            isAutoLayoutActive 
+              ? "bg-blue-600 hover:bg-blue-700 text-white" 
+              : "text-slate-700 bg-slate-100 hover:bg-slate-200 border-slate-200"
+          }`}
+        >
+          <Layout className="w-4 h-4" />
+          {isAutoLayoutActive ? "Auto Layout: ON" : "Auto Layout: OFF"}
+        </Button>
         <Button variant="outline" onClick={handleExport} className="gap-2">
           <Download className="w-4 h-4" />
           Export

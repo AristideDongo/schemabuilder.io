@@ -7,6 +7,7 @@ import { ExportProjectUseCase } from "../../application/use-cases/export/ExportP
 import { AddTableUseCase } from "../../application/use-cases/table/AddTableUseCase";
 import { DeleteTableUseCase } from "../../application/use-cases/table/DeleteTableUseCase";
 import { DeleteRelationUseCase } from "../../application/use-cases/relation/DeleteRelationUseCase";
+import { AutoLayoutUseCase } from "../../application/use-cases/table/AutoLayoutUseCase";
 
 const projectRepository = new LocalStorageProjectRepository();
 
@@ -20,4 +21,5 @@ export const container = {
   addTableUseCase: new AddTableUseCase(),
   deleteTableUseCase: new DeleteTableUseCase(),
   deleteRelationUseCase: new DeleteRelationUseCase(),
+  autoLayoutUseCase: new AutoLayoutUseCase(),
 };

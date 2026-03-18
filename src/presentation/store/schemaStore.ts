@@ -21,7 +21,7 @@ interface SchemaState {
   loadProjects: () => Promise<void>;
   createProject: (name: string, engine?: DbEngine) => Promise<void>;
   loadProject: (id: string) => Promise<void>;
-  saveCurrentProject: () => Promise<void>;
+  saveCurrentProject: (showToast?: boolean) => Promise<void>;
   setProject: (project: Project | null) => void;
   updateActiveProject: (updater: (draft: Project) => void, skipHistory?: boolean) => void;
   deleteProject: (id: string) => Promise<void>;
@@ -30,6 +30,11 @@ interface SchemaState {
   setSelectedElement: (element: { type: 'table' | 'column' | 'relation'; tableId?: string; columnId?: string; relationId?: string } | null) => void;
   addTable: (name: string, x: number, y: number) => void;
   deleteSelectedElement: () => void;
+  deleteTable: (tableId: string) => void;
+  deleteRelation: (relationId: string) => void;
+  isAutoLayoutActive: boolean;
+  toggleAutoLayout: () => void;
+  autoLayout: () => void;
 }
 
 export const useSchemaStore = create<SchemaState>((set, get) => ({
@@ -37,6 +42,7 @@ export const useSchemaStore = create<SchemaState>((set, get) => ({
   projectsList: [],
   isLoading: false,
   selectedElement: null,
+  isAutoLayoutActive: false,
   past: [],
   future: [],
 
@@ -117,14 +123,16 @@ export const useSchemaStore = create<SchemaState>((set, get) => ({
     }
   },
 
-  saveCurrentProject: async () => {
+  saveCurrentProject: async (showToast = false) => {
     const { activeProject } = get();
     if (!activeProject) return;
 
     set({ isLoading: true });
     try {
       await container.saveProjectUseCase.execute(activeProject);
-      toast.success("Project saved successfully", { autoClose: 2000 });
+      if (showToast) {
+        toast.success("Project saved successfully", { autoClose: 2000 });
+      }
     } finally {
       set({ isLoading: false });
     }
@@ -249,5 +257,57 @@ export const useSchemaStore = create<SchemaState>((set, get) => ({
     }
 
     setSelectedElement(null);
+  },
+
+  deleteTable: (tableId: string) => {
+    const { activeProject, updateActiveProject, selectedElement, setSelectedElement } = get();
+    if (!activeProject) return;
+
+    const table = activeProject.tables.find(t => t.id === tableId);
+    if (!table) return;
+
+    updateActiveProject((project) => {
+      container.deleteTableUseCase.execute(project, tableId);
+    });
+
+    if (selectedElement?.type === 'table' && selectedElement.tableId === tableId) {
+      setSelectedElement(null);
+    }
+    toast.error(`Table "${table.name}" deleted`);
+  },
+
+  deleteRelation: (relationId: string) => {
+    const { activeProject, updateActiveProject, selectedElement, setSelectedElement } = get();
+    if (!activeProject) return;
+
+    updateActiveProject((project) => {
+      container.deleteRelationUseCase.execute(project, relationId);
+    });
+
+    if (selectedElement?.type === 'relation' && selectedElement.relationId === relationId) {
+      setSelectedElement(null);
+    }
+    toast.warn("Relation deleted");
+  },
+
+  autoLayout: () => {
+    const { updateActiveProject } = get();
+    updateActiveProject((project) => {
+      container.autoLayoutUseCase.execute(project);
+    }, true); // skipHistory for auto-layout if it's continuous? 
+    // Actually, maybe not. Let's keep it consistent.
+  },
+
+  toggleAutoLayout: () => {
+    const { isAutoLayoutActive, autoLayout } = get();
+    const nextState = !isAutoLayoutActive;
+    set({ isAutoLayoutActive: nextState });
+    
+    if (nextState) {
+      autoLayout();
+      toast.success("Auto-layout mode: ON (Automatic organization)");
+    } else {
+      toast.info("Auto-layout mode: OFF (Manual organization)");
+    }
   }
 }));

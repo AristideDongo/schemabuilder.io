@@ -10,10 +10,9 @@ export const useKeyboardShortcuts = () => {
     saveCurrentProject,
     exportProject,
     selectedElement,
-    updateActiveProject,
-    setSelectedElement,
     activeProject,
-    deleteSelectedElement
+    deleteSelectedElement,
+    autoLayout
   } = useSchemaStore();
 
   useEffect(() => {
@@ -49,13 +48,19 @@ export const useKeyboardShortcuts = () => {
       // Save: Ctrl+S
       if (cmdOrCtrl && e.key.toLowerCase() === "s") {
         e.preventDefault();
-        saveCurrentProject();
+        saveCurrentProject(true);
       }
 
       // Export: Ctrl+E
       if (cmdOrCtrl && e.key.toLowerCase() === "e") {
         e.preventDefault();
         exportProject();
+      }
+
+      // Auto Layout: Ctrl+L
+      if (cmdOrCtrl && e.key.toLowerCase() === "l") {
+        e.preventDefault();
+        autoLayout();
       }
 
       // Delete: Delete or Backspace
@@ -78,5 +83,5 @@ export const useKeyboardShortcuts = () => {
 
     window.addEventListener("keydown", handleKeyDown);
     return () => window.removeEventListener("keydown", handleKeyDown);
-  }, [undo, redo, saveCurrentProject, exportProject, selectedElement, activeProject, deleteSelectedElement]);
+  }, [undo, redo, saveCurrentProject, exportProject, selectedElement, activeProject, deleteSelectedElement, autoLayout]);
 };
