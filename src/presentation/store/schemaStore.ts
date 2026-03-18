@@ -3,6 +3,7 @@ import { Project } from "../../domain/entities/Project";
 import { container } from "../lib/container";
 import { DbEngine } from "../../domain/value-objects/DbEngine";
 import { ProjectMapper } from "../../application/mappers/ProjectMapper";
+import { toast } from "react-toastify";
 
 interface SchemaState {
   activeProject: Project | null;
@@ -11,16 +12,24 @@ interface SchemaState {
 
   selectedElement: { type: 'table' | 'column' | 'relation'; tableId?: string; columnId?: string; relationId?: string } | null;
 
+  past: string[]; // Store JSON snapshots
+  future: string[];
+
+  undo: () => void;
+  redo: () => void;
+
   loadProjects: () => Promise<void>;
   createProject: (name: string, engine?: DbEngine) => Promise<void>;
   loadProject: (id: string) => Promise<void>;
   saveCurrentProject: () => Promise<void>;
   setProject: (project: Project | null) => void;
-  updateActiveProject: (updater: (draft: Project) => void) => void;
+  updateActiveProject: (updater: (draft: Project) => void, skipHistory?: boolean) => void;
   deleteProject: (id: string) => Promise<void>;
   renameProject: (id: string, newName: string) => Promise<void>;
   exportProject: (projectId?: string) => Promise<void>;
   setSelectedElement: (element: { type: 'table' | 'column' | 'relation'; tableId?: string; columnId?: string; relationId?: string } | null) => void;
+  addTable: (name: string, x: number, y: number) => void;
+  deleteSelectedElement: () => void;
 }
 
 export const useSchemaStore = create<SchemaState>((set, get) => ({
@@ -28,8 +37,50 @@ export const useSchemaStore = create<SchemaState>((set, get) => ({
   projectsList: [],
   isLoading: false,
   selectedElement: null,
+  past: [],
+  future: [],
 
   setSelectedElement: (element) => set({ selectedElement: element }),
+
+  undo: () => {
+    const { past, activeProject, future } = get();
+    if (past.length === 0 || !activeProject) return;
+
+    const previousSnapshot = past[past.length - 1];
+    const newPast = past.slice(0, past.length - 1);
+    
+    // Save current to future for redo
+    const currentSnapshot = JSON.stringify(activeProject);
+    const newFuture = [currentSnapshot, ...future].slice(0, 30);
+
+    set({
+      activeProject: ProjectMapper.toDomain(JSON.parse(previousSnapshot)),
+      past: newPast,
+      future: newFuture,
+      selectedElement: null
+    });
+    toast.info("Undo: Reverted last change", { autoClose: 1500 });
+  },
+
+  redo: () => {
+    const { future, activeProject, past } = get();
+    if (future.length === 0 || !activeProject) return;
+
+    const nextSnapshot = future[0];
+    const newFuture = future.slice(1);
+
+    // Save current to past
+    const currentSnapshot = JSON.stringify(activeProject);
+    const newPast = [...past, currentSnapshot].slice(-30);
+
+    set({
+      activeProject: ProjectMapper.toDomain(JSON.parse(nextSnapshot)),
+      past: newPast,
+      future: newFuture,
+      selectedElement: null
+    });
+    toast.info("Redo: Applied next change", { autoClose: 1500 });
+  },
 
   loadProjects: async () => {
     set({ isLoading: true });
@@ -48,6 +99,8 @@ export const useSchemaStore = create<SchemaState>((set, get) => ({
       set((state) => ({
         projectsList: [...state.projectsList, project],
         activeProject: project,
+        past: [],
+        future: []
       }));
     } finally {
       set({ isLoading: false });
@@ -58,7 +111,7 @@ export const useSchemaStore = create<SchemaState>((set, get) => ({
     set({ isLoading: true });
     try {
       const project = await container.loadProjectUseCase.execute(id);
-      set({ activeProject: project });
+      set({ activeProject: project, past: [], future: [] });
     } finally {
       set({ isLoading: false });
     }
@@ -71,12 +124,13 @@ export const useSchemaStore = create<SchemaState>((set, get) => ({
     set({ isLoading: true });
     try {
       await container.saveProjectUseCase.execute(activeProject);
+      toast.success("Project saved successfully", { autoClose: 2000 });
     } finally {
       set({ isLoading: false });
     }
   },
 
-  setProject: (project: Project | null) => set({ activeProject: project }),
+  setProject: (project: Project | null) => set({ activeProject: project, past: [], future: [] }),
 
   deleteProject: async (id: string) => {
     try {
@@ -84,6 +138,8 @@ export const useSchemaStore = create<SchemaState>((set, get) => ({
       set((state) => ({
         projectsList: state.projectsList.filter(p => p.id !== id),
         activeProject: state.activeProject?.id === id ? null : state.activeProject,
+        past: state.activeProject?.id === id ? [] : state.past,
+        future: state.activeProject?.id === id ? [] : state.future
       }));
     } catch {
       // if no delete method, remove from list only
@@ -134,23 +190,64 @@ export const useSchemaStore = create<SchemaState>((set, get) => ({
       link.click();
       document.body.removeChild(link);
       URL.revokeObjectURL(url);
+      toast.success(`Exported as ${filename}`, { autoClose: 2000 });
     } catch (error) {
       console.error("Export failed:", error);
+      toast.error("Export failed. Please try again.");
     }
   },
 
   // Helper for triggering reactivity by returning a fresh clone constructed via Mapper
-  updateActiveProject: (updater: (draft: Project) => void) => {
-    const { activeProject } = get();
+  updateActiveProject: (updater: (draft: Project) => void, skipHistory = false) => {
+    const { activeProject, past } = get();
     if (!activeProject) return;
 
+    const currentSnapshot = JSON.stringify(activeProject);
+
     // Deep clone via JSON to break references, then reconstruct standard Entity
-    const rawClone = JSON.parse(JSON.stringify(activeProject));
+    const rawClone = JSON.parse(currentSnapshot);
     const newProject = ProjectMapper.toDomain(rawClone);
 
     updater(newProject);
     newProject.updatedAt = new Date(); // update timestamp
 
-    set({ activeProject: newProject });
+    const newState: Partial<SchemaState> = { activeProject: newProject };
+    
+    if (!skipHistory) {
+      newState.past = [...past, currentSnapshot].slice(-30);
+      newState.future = []; // Clear future on new action
+    }
+
+    set(newState);
+  },
+
+  addTable: (name: string, x: number, y: number) => {
+    const { updateActiveProject } = get();
+    updateActiveProject((project) => {
+      container.addTableUseCase.execute(project, name, x, y);
+    });
+    toast.success(`Table "${name}" created`);
+  },
+
+  deleteSelectedElement: () => {
+    const { selectedElement, activeProject, updateActiveProject, setSelectedElement } = get();
+    if (!activeProject || !selectedElement) return;
+
+    if (selectedElement.type === 'table' && selectedElement.tableId) {
+      const table = activeProject.tables.find(t => t.id === selectedElement.tableId);
+      if (table) {
+        updateActiveProject((project) => {
+          container.deleteTableUseCase.execute(project, table.id);
+        });
+        toast.error(`Table "${table.name}" deleted`);
+      }
+    } else if (selectedElement.type === 'relation' && selectedElement.relationId) {
+      updateActiveProject((project) => {
+        container.deleteRelationUseCase.execute(project, selectedElement.relationId!);
+      });
+      toast.warn("Relation deleted");
+    }
+
+    setSelectedElement(null);
   }
 }));

@@ -4,14 +4,24 @@ import { useState, useRef } from "react";
 import { useSchemaStore } from "../../store/schemaStore";
 import { Button } from "@/components/ui/button";
 import { Save, Undo, Redo, Download, Home, Edit2, Check, X } from "lucide-react";
-import { useUndoRedo } from "../../hooks/useUndoRedo";
 import { toast } from "react-toastify";
 import { useRouter } from "next/navigation";
 import { Input } from "@/components/ui/input";
 
 export default function Toolbar() {
-  const { activeProject, saveCurrentProject, renameProject, exportProject } = useSchemaStore();
-  const { undo, redo, canUndo, canRedo } = useUndoRedo();
+  const { 
+    activeProject, 
+    saveCurrentProject, 
+    renameProject, 
+    exportProject,
+    undo,
+    redo,
+    past,
+    future
+  } = useSchemaStore();
+  
+  const canUndo = past.length > 0;
+  const canRedo = future.length > 0;
   const router = useRouter();
 
   const [isEditing, setIsEditing] = useState(false);

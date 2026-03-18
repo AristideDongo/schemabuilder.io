@@ -7,9 +7,14 @@ import Toolbar from "@/presentation/components/toolbar/Toolbar";
 import Sidebar from "@/presentation/components/panels/Sidebar";
 import PropertiesPanel from "@/presentation/components/panels/PropertiesPanel";
 
+import { useKeyboardShortcuts } from "@/presentation/hooks/useKeyboardShortcuts";
+
 export default function ProjectEditor({ params }: { params: Promise<{ id: string }> }) {
   const { id } = use(params);
   const { loadProject, activeProject, isLoading, saveCurrentProject } = useSchemaStore();
+
+  // Initialize keyboard shortcuts
+  useKeyboardShortcuts();
 
   // Initial load
   useEffect(() => {

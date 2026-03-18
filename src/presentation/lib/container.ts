@@ -4,6 +4,9 @@ import { SaveProjectUseCase } from "../../application/use-cases/project/SaveProj
 import { LoadProjectUseCase } from "../../application/use-cases/project/LoadProjectUseCase";
 import { DeleteProjectUseCase } from "../../application/use-cases/project/DeleteProjectUseCase";
 import { ExportProjectUseCase } from "../../application/use-cases/export/ExportProjectUseCase";
+import { AddTableUseCase } from "../../application/use-cases/table/AddTableUseCase";
+import { DeleteTableUseCase } from "../../application/use-cases/table/DeleteTableUseCase";
+import { DeleteRelationUseCase } from "../../application/use-cases/relation/DeleteRelationUseCase";
 
 const projectRepository = new LocalStorageProjectRepository();
 
@@ -14,4 +17,7 @@ export const container = {
   loadProjectUseCase: new LoadProjectUseCase(projectRepository),
   deleteProjectUseCase: new DeleteProjectUseCase(projectRepository),
   exportProjectUseCase: new ExportProjectUseCase(),
+  addTableUseCase: new AddTableUseCase(),
+  deleteTableUseCase: new DeleteTableUseCase(),
+  deleteRelationUseCase: new DeleteRelationUseCase(),
 };
